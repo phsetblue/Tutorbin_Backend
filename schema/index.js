@@ -1,0 +1,17 @@
+export { default as AdminSchema } from "./admin.js";
+// export { default as QuestionSchema } from "./question.js";
+// export { default as StudentSchema } from "./student.js";
+// export { default as TutorSchema } from "./tutor.js";
+export { default as TokenStudentSchema } from "./tokenstudent.js";
+export { default as TokenTutorSchema } from "./tokentutor.js";
+export { default as TokenAdminSchema } from "./tokenadmin.js";
+export { default as StudentRegisterSchema } from "./studentregister.js";
+export { default as StudentInformationSchema } from "./studentinformation.js";
+export { default as StudentWalletSchema } from "./studentwallet.js";
+export { default as StudentQuestionsSchema } from "./studentquestions.js";
+export { default as MainQuestionsSchema } from "./mainquestions.js";
+export { default as TutorQuestionsSchema } from "./tutorquestions.js";
+export { default as TutorSubjectsSchema } from "./tutorsubjects.js";
+export { default as TutorInformationSchema } from "./tutorinformation.js";
+export { default as TutorBankDetailsSchema } from "./tutorbankdetails.js";
+export { default as TutorWalletSchema } from "./tutorwallet.js";

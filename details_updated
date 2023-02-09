@@ -1,0 +1,95 @@
+/config
+	/index.js
+/controller
+	/index.js
+	/adminController.js
+	/questionController.js
+	/studentController.js
+	/tutorController.js
+/database
+	/index.js
+/middleware
+	/auth.js
+	/validation.js
+/routes
+	/index.js
+/modals
+	/index.js
+	/admin.js
+	/question.js
+	/student.js
+	/tutor.js
+/schema
+	/index.js
+	/admin.js
+	/question.js
+	/student.js
+	/tutor.js
+/index.js
+/.env
+
+write a file structure for mern stack with detail which has functionality like it has mainly three types of users :
+1) Student(name, email, password(using salthash), username, mobilenumber, ownreffralcode(genrated when register), friend's reffral code(not required compulsory)),
+2) Tutor(name, email, password(using salthash), mobilenumber, expertice in subjects(array)), 
+3) Admin(name, email, password(using salthash), mobilenumber) and they have diffrent functionalities like : 
+
+for tutor :
+-> tutor registration has a step by step process like
+ 1) personal details(name, email, password, mobile number)
+ 2) professional details(education qualifications)
+ 3) choose subjects
+ 4) give test for this subjects(it will 30 mcq quiz for every subject that tutor selects)
+ 5) enter bank details(all details of like account number, bank name, ifsc code, branch name, account holder name, etc.)
+ after this they get a pop up like your profile is in review and you get update in 2-3 days, then this application was given at admin dashboard's tutor varificatation page.
+
+-> if tutor was accepted by admin than he/she will be notified with email.
+-> accepted turor can login and have many functionalities like answering the questions and more will be said later.
+-> every tutor has dashboard of unsolved question with remaining time, tutor has 2 choice either to answer the question or skip the question. this action noted on server that how many question tutor attend and how many question tutor skips, accoarding to this the have cf score = (attended question) / (attended question + skipped question), if this cf score is below 80 then the tutor is notified that he/she can't be tutor anymore.
+-> for answering the question they have a prompt like for diffrent type of questions like mcq, true/false, fillups, match the following , definations, short answer, case study, writing questions - essay,etc., long answer, problem solving. for this diffrent type of questions they have diffrent prompt for better answer giving, once tutor gives answer the answer is stored in database and the system then notifies other tutors in their dashboard thet this question is solved, once the answer is submitted to system, it will make this question answer a query to admin panel for review which is done by expert who is likely to be admin.
+
+-> tutor has also wallet which has transaction history page of given answers payments.
+once tutor's wallet has like 500 Rs. they can reddeem this into their bank account which they have given at time of registration.
+
+1. how to handle the skiping question form?
+2. how to handle the reffer code?
+3.is there any need of mobile no. validation?
+4.mobile no are unique or not?
+5. which fields are store in the professional details?
+6.name of all subjects?
+7. mcq test questions?
+8. what is open and close question?
+9. in student questions page filter performing frontend and backend?
+10. if tutor fails in any subject exam can he/she give exam again ?
+11. if tutor answers the question the question money give before review by admin or after?
+
+
+
+
+for Student:
+-> student registration(have optional functionality for add freind's reffral code)
+-> once registered student the data stored in database with studen's own unique reffral code generated and if student entered friend's reffral code his friend will get some credits for this.
+-> every student user has a wallet in the website which stores money which can spend on this website,
+-> for the wallet the student has option to add money in their wallet via 4 options : 1) Credit/Debit Card, 2) Paypal, 3) UPI, 4) Net banking
+-> while adding money we have minimum limit is 10 Rs. and maximum 500 Rs.
+-> once the money added via one of the methods in student's wallet it will showed on students wallet available amount and it also has transaction history in frontend which shows complete history of payments in this wallet
+-> reffral code works like if new student use my reffral than after succesful registration of my friend i get 25 Rs. in my wallet.
+-> After Succesful registering or login of student user can ask question which is like they can write question in text or upload photo of question with details like which subject question with deadline like 6 hrs, 12 hrs, 24 hrs, and accarding to deadline limit the student is charged for the answer for question like for shorter deadline more price of the question.
+-> after uploading question accoarding to question subject the system finds the tutors which has expertice in that subject of question and sends this question with it's deadline time and notifies every tutor in their dashboard.
+
+Doubts:-
+1. when user go to sign up in google how to store the refferal code?
+2. which fields are store in the class?
+2.1. class has importance in subjects of offered and should it has different tutor for diffrent classes.
+3. what is posting streak ? and how it's work?
+4. for different types of question should we have to make different apis?
+5. is there any need of mobile no. validation?
+
+
+for admin : 
+-> the admin have dashboard which have total informatio of the website and he/she can see the all registered students, all tutor applicants which is pending for approval and the admin checks complete application of turtor and have choice to give approval or rejection to tutor profile.
+-> admin also have a page for tutor and their subjects and their cf score and a button which has functionality like if it is on the tutor is approved for answering questions and if it goes to off the tutor is suspended from this site.
+-> admin also has the transactions page which has all details of current transaction happenes in the website.
+-> admin also has a page for reviewing the answers of the tutors answer to students question, based on admin's review for the answer if he/she approves the answer then it will delivered to student. if he/she don't like the answer then they themselves answer the question and delivers to student.
+-> in all cases of the question and answer if some tutor has given the answer then tutor's get half money of question price and half money goes to website's main wallet.
+-> in worst case if none of tutor gives the answer to qustion then the admin have to answer the question and the whole questionmoney goes to website's main wallet.
+-> admin can specifically remove any student or tutor from site and also removes specific expretice subject from any tutor.

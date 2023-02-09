@@ -1,0 +1,39 @@
+import express from "express";
+import { studentController } from "../controller/index.js";
+import { passportConfigRegister } from '../config/passportstudentregister.js';
+import passport from 'passport';
+import session from 'express-session';
+import MongoStore from 'connect-mongo';
+// const p1 = passport;
+// import studentController from "../controller/studentController.js";
+const router = express.Router();
+
+router.use(express.urlencoded({ extended: false }));
+router.use(express.json());
+router.use(session({
+    secret: 'secret-key',
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({ mongoUrl: process.env.MONGO_URL })
+    //   store: new MongoStore({ mongooseConnection: mongoose.connection })
+}));
+router.use(passport.initialize());
+router.use(passport.session());
+
+// Passport Configuration
+await passportConfigRegister(passport);
+
+router.get("/", (req, res) => {
+    res.render('studentregister');
+});
+
+router.get("/auth/google", passport.authenticate("register-google", { scope: ['profile', 'email'] }));
+
+router.get("/auth/google/callback",
+    passport.authenticate("register-google", { failureRedirect: '/student/register' }),
+    studentController.googleregister
+);
+
+router.post("/email", studentController.emailregister);
+
+export default router;
