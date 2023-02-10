@@ -9,7 +9,7 @@ export const passportConfigRegister = passport => {
         callbackURL: CALLBACK_URL_REGISTER
     },
         (accessToken, refreshToken, profile, done) => {
-            console.log("in register");
+            // console.log("in register");
             const user = {
                 name: profile.displayName,
                 email: profile.emails[0].value,

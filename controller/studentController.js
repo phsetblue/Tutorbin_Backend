@@ -1,6 +1,6 @@
 import { Student, StudentInformation, TokenStudent } from "../model/index.js";
 import { StudentInformationSchema, StudentRegisterSchema } from "../schema/index.js";
-import { StudentRegisterValidatorSchema, refreshTokenValidatorSchema, StudentLoginValidatorSchema, StudentSetInfoValidatorSchema, StudentChangePasswordValidatorSchema } from "../validators/index.js";
+import { StudentRegisterValidatorSchema, refreshTokenValidatorSchema, StudentLoginValidatorSchema, StudentSetInfoValidatorSchema, StudentChangePasswordValidatorSchema, StudentGoogleRegister2ValidatorSchema } from "../validators/index.js";
 import CustomErrorHandler from "../service/CustomErrorHandler.js";
 import bcrypt from "bcrypt";
 import JwtService from "../service/JwtService.js";
@@ -34,7 +34,7 @@ const studentController = {
                 var tt = await TokenStudentSchema.create({ _id: aa._id, token: refresh_token, expiresAt: new Date() });
                 let token = refresh_token;
                 var info = aa;
-                var message = "User Registered Successfully.";
+                var message = "User Registered Successfully. now redirect to password, class, reffral page.";
                 res.status(200).json({ info, token, message });
                 // res.redirect("/student/home");
             } else {
@@ -46,6 +46,46 @@ const studentController = {
             // res.json({"message": "Error in registration"});
             console.log(error);
             res.redirect("/student/register");
+        }
+    },
+    async googleregister2(req, res, next) {
+        try {
+            const { error } = StudentGoogleRegister2ValidatorSchema.validate(req.body);
+            if (error) {
+                return res.json({ "error": error.message });
+            }
+
+            let rec_token = await TokenStudent.fetchByToken({ token: req.body.token });
+            if (rec_token === null || !rec_token.token) {
+                return res.status(400).json({ "error": "Invalid refresh token!" });
+            }
+
+            var st_id = rec_token._id;
+
+            let { password } = req.body;
+            const salt = await bcrypt.genSalt(parseInt(SALT_FACTOR));
+            const hashedPassword = await bcrypt.hash(password, salt);
+            req.body.password = hashedPassword;
+            var user;
+            if (req.body.referralCode) {
+                user = await StudentRegisterSchema.findByIdAndUpdate(st_id, {
+                    password: req.body.password,
+                    class: req.body.class,
+                    referralCode: req.body.referralCode
+                }, { new: true });
+            } else {
+                user = await StudentRegisterSchema.findByIdAndUpdate(st_id, {
+                    password: req.body.password,
+                    class: req.body.class
+                }, { new: true });
+            }
+
+            var info = user;
+            var message = "User Registered Successfully.";
+            res.status(200).json({ info, token: req.body.token, message });
+
+        } catch (err) {
+            return next(err);
         }
     },
     async emailregister(req, res, next) {
@@ -143,7 +183,7 @@ const studentController = {
             }
             var message = "User Login Successfully.";
             var info = user;
-            res.status(200).json({ info, token : refresh_token, message });
+            res.status(200).json({ info, token: refresh_token, message });
         } catch (err) {
             return next(err);
         }
@@ -187,7 +227,7 @@ const studentController = {
             }
             var message = "User Login Successfully.";
             var info = user;
-            res.status(200).json({ info, token : refresh_token, message });
+            res.status(200).json({ info, token: refresh_token, message });
         } catch (err) {
             return next(err);
         }
@@ -222,7 +262,7 @@ const studentController = {
             if (error) {
                 res.status(400).json({ "error": error.message });
             }
-            console.log({ token: req.body.token });
+            // console.log({ token: req.body.token });
             let rec_token = await TokenStudent.fetchByToken({ token: req.body.token });
             if (rec_token === null || !rec_token.token) {
                 res.status(400).json({ "error": "Invalid refresh token!" });
@@ -232,7 +272,7 @@ const studentController = {
 
             var info = await StudentInformation.fetchById({ userId: st_id });
             var message = "User details Fetched Successfully.";
-            res.status(200).json({info, message});
+            res.status(200).json({ info, message });
 
 
 

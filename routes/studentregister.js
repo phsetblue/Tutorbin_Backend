@@ -35,5 +35,6 @@ router.get("/auth/google/callback",
 );
 
 router.post("/email", studentController.emailregister);
+router.post("/google", studentController.googleregister2);
 
 export default router;

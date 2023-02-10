@@ -3,3 +3,4 @@ export { default as refreshTokenValidatorSchema} from "./refreshTokenValidator.j
 export { default as StudentLoginValidatorSchema} from "./studentloginValidator.js";
 export { default as StudentSetInfoValidatorSchema } from "./studentSetInfoValidator.js";
 export { default as StudentChangePasswordValidatorSchema } from "./studentchangepasswordValidator.js";
+export { default as StudentGoogleRegister2ValidatorSchema } from "./studentgoogleregister2Validator.js";
