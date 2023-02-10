@@ -1,5 +1,5 @@
-import { Student, StudentInformation, TokenStudent, StudentWallet } from "../model/index.js";
-import { StudentInformationSchema, StudentRegisterSchema, StudentWalletSchema } from "../schema/index.js";
+import { Student, StudentInformation, TokenStudent, StudentWallet, studentQuestions } from "../model/index.js";
+import { StudentInformationSchema, StudentRegisterSchema, StudentWalletSchema, StudentQuestionsSchema } from "../schema/index.js";
 import { StudentRegisterValidatorSchema, refreshTokenValidatorSchema, StudentLoginValidatorSchema, StudentSetInfoValidatorSchema, StudentChangePasswordValidatorSchema, StudentGoogleRegister2ValidatorSchema } from "../validators/index.js";
 import CustomErrorHandler from "../service/CustomErrorHandler.js";
 import bcrypt from "bcrypt";
@@ -81,6 +81,7 @@ const studentController = {
             }
 
             var wal = await StudentWallet.create({studentId: user._id});
+            var st_qu = await studentQuestions.create({studentId: user._id});
 
             var info = user;
             var message = "User Registered Successfully.";
@@ -131,6 +132,7 @@ const studentController = {
                 var tt = await TokenStudentSchema.create({ _id: aa._id, token: refresh_token, expiresAt: new Date() });
                 let token = refresh_token;
                 var wal = await StudentWallet.create({studentId: aa._id});
+                var st_qu = await studentQuestions.create({studentId: aa._id});
                 var info = aa;
                 var message = "User Registered Successfully.";
                 res.status(200).json({ info, token, message });

@@ -1,9 +1,23 @@
 import express from "express";
+import multer from 'multer';
 import routeslogin from "./studentlogin.js";
 import routesregister from "./studentregister.js";
-import { studentController } from "../controller/index.js";
+import { studentController, questionController } from "../controller/index.js";
 const router = express.Router();
 
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './uploads/');
+    },
+    filename: function (req, file, cb) {
+        cb(null, new Date().toISOString() + '-' + file.originalname);
+    }
+});
+
+const upload = multer({
+    storage: storage
+});
 
 // Middleware
 router.use(express.urlencoded({ extended: false }));
@@ -18,7 +32,10 @@ router.post("/student/changepassword", studentController.changepassword);
 // router.post("/tutor/register", tutorController.register);
 // router.post("/tutor/login", tutorController.login);
 // router.post("/tutor/logout", tutorController.logout);
-// router.post("/question/ask", questionController.ask);
+
+// router.post("/student/registerandask", studentController.regandask);
+router.post("/question/ask", upload.array('questionImage', 5), questionController.ask);
+
 // router.post("/question/answer/:id", questionController.answer);
 // router.post("/admin/register", adminController.register);
 // router.post("/admin/login", adminController.login);
