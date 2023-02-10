@@ -9,11 +9,12 @@ const router = express.Router();
 router.use(express.urlencoded({ extended: false }));
 router.use(express.json());
 
-router.use("/student", routeslogin);
+router.use("/student/login", routeslogin);
 router.use("/student/register", routesregister);
 router.post("/student/logout", studentController.logout);
 router.get("/student/getinfo", studentController.getinfo);
-router.post("/student/info", studentController.info);
+router.post("/student/setinfo", studentController.setinfo);
+router.post("/student/changepassword", studentController.changepassword);
 // router.post("/tutor/register", tutorController.register);
 // router.post("/tutor/login", tutorController.login);
 // router.post("/tutor/logout", tutorController.logout);

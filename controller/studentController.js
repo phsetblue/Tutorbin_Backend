@@ -1,11 +1,20 @@
 import { Student, StudentInformation, TokenStudent } from "../model/index.js";
 import { StudentInformationSchema, StudentRegisterSchema } from "../schema/index.js";
-import { StudentRegisterValidatorSchema, refreshTokenValidatorSchema, StudentLoginValidatorSchema } from "../validators/index.js";
+import { StudentRegisterValidatorSchema, refreshTokenValidatorSchema, StudentLoginValidatorSchema, StudentSetInfoValidatorSchema, StudentChangePasswordValidatorSchema } from "../validators/index.js";
 import CustomErrorHandler from "../service/CustomErrorHandler.js";
 import bcrypt from "bcrypt";
 import JwtService from "../service/JwtService.js";
 import { TokenStudentSchema } from "../schema/index.js";
 import { APP_URL, SALT_FACTOR } from "../config/index.js";
+import studentregister from "../schema/studentregister.js";
+import crypto from 'crypto';
+
+
+function generateReferralCode(userId) {
+    const hash = crypto.createHash('sha256');
+    hash.update(userId + Date.now().toString());
+    return hash.digest('hex').substring(0, 12);
+}
 
 const studentController = {
     async googleregister(req, res, next) {
@@ -24,7 +33,9 @@ const studentController = {
                 refresh_token = await JwtService.sign({ _id: aa._id });
                 var tt = await TokenStudentSchema.create({ _id: aa._id, token: refresh_token, expiresAt: new Date() });
                 let token = refresh_token;
-                res.status(200).json({ aa, token });
+                var info = aa;
+                var message = "User Registered Successfully.";
+                res.status(200).json({ info, token, message });
                 // res.redirect("/student/home");
             } else {
                 res.status(400).json({ "error": aa.error });
@@ -77,7 +88,9 @@ const studentController = {
                 refresh_token = await JwtService.sign({ _id: aa._id });
                 var tt = await TokenStudentSchema.create({ _id: aa._id, token: refresh_token, expiresAt: new Date() });
                 let token = refresh_token;
-                res.status(200).json({ aa, token });
+                var info = aa;
+                var message = "User Registered Successfully.";
+                res.status(200).json({ info, token, message });
                 // res.json(aa);
                 // res.redirect("/student/home");
             } else {
@@ -123,13 +136,14 @@ const studentController = {
 
                 } else {
                     refresh_token = r_t.token;
-                    console.log("already exist");
+                    // console.log("already exist");
                 }
             } catch (error) {
                 console.log("error generated");
             }
             var message = "User Login Successfully.";
-            res.status(200).json({ user, refresh_token, message });
+            var info = user;
+            res.status(200).json({ info, token : refresh_token, message });
         } catch (err) {
             return next(err);
         }
@@ -166,13 +180,14 @@ const studentController = {
 
                 } else {
                     refresh_token = r_t.token;
-                    console.log("already exist");
+                    // console.log("already exist");
                 }
             } catch (error) {
                 console.log("error generated");
             }
             var message = "User Login Successfully.";
-            res.status(200).json({ user, refresh_token, message });
+            var info = user;
+            res.status(200).json({ info, token : refresh_token, message });
         } catch (err) {
             return next(err);
         }
@@ -215,9 +230,9 @@ const studentController = {
 
             var st_id = rec_token._id;
 
-            var data = await StudentInformation.fetchById({ userId: st_id });
-
-            res.status(200).json(data);
+            var info = await StudentInformation.fetchById({ userId: st_id });
+            var message = "User details Fetched Successfully.";
+            res.status(200).json({info, message});
 
 
 
@@ -226,12 +241,12 @@ const studentController = {
             return next(CustomErrorHandler.somethingwrong());
         }
     },
-    async info(req, res, next) {
+    async setinfo(req, res, next) {
         try {
-            // const { error } = refreshTokenValidatorSchema.validate(req.body);
-            // if (error) {
-            //     res.status(400).json({ "error": error.message });
-            // }
+            const { error } = StudentSetInfoValidatorSchema.validate(req.body);
+            if (error) {
+                return res.status(400).json({ "error": error.message });
+            }
             console.log({ token: req.body.token });
             let rec_token = await TokenStudent.fetchByToken({ token: req.body.token });
             if (rec_token === null || !rec_token.token) {
@@ -239,32 +254,72 @@ const studentController = {
             }
 
             var st_id = rec_token._id;
-            const { name, username, mobileNo, timezone, ownReferral } = req.body;
+            const { name, email, board, city, school } = req.body;
             let st_info = await StudentInformation.fetchById({ userId: st_id });
             if (st_info) {
                 var updated_st = await StudentInformationSchema.findByIdAndUpdate(st_info._id, {
                     name,
-                    username,
-                    mobileNo,
-                    timezone,
+                    email,
+                    board,
+                    city,
+                    school
                 }, { new: true });
-                const message = "Student Information Updated Successfully.";
-                res.status(200).json({updated_st, message});
+                const message = "Student Information Created Successfully.";
+                res.status(200).json({ updated_st, message });
             } else {
-
+                const ownReferral = generateReferralCode(st_id);
                 var new_st = new StudentInformationSchema({
                     userId: st_id,
                     name,
-                    username,
-                    mobileNo,
-                    timezone,
+                    email,
+                    board,
+                    city,
+                    school,
                     ownReferral
                 });
 
-                var st = await StudentInformation.create(new_st);
+                var info = await StudentInformation.create(new_st);
                 const message = "Student Information Created Successfully.";
-                res.status(200).json({st, message});
+                res.status(200).json({ info, message });
             }
+        } catch (err) {
+            console.log(err);
+            return next(CustomErrorHandler.somethingwrong());
+        }
+    },
+    async changepassword(req, res, next) {
+        try {
+            const { error } = StudentChangePasswordValidatorSchema.validate(req.body);
+            if (error) {
+                return res.status(400).json({ "error": error.message });
+            }
+            // console.log({ token: req.body.token });
+            let rec_token = await TokenStudent.fetchByToken({ token: req.body.token });
+            if (rec_token === null || !rec_token.token) {
+                return res.status(400).json({ "error": "Invalid refresh token!" });
+            }
+            const { password, new_password } = req.body;
+
+            const salt = await bcrypt.genSalt(parseInt(SALT_FACTOR));
+            const hashedPassword = await bcrypt.hash(new_password, salt);
+            // new_password = hashedPassword;
+            var st_id = rec_token._id;
+
+            var data = await Student.fetchById({ _id: st_id });
+
+            const match = await bcrypt.compare(password, data.password);
+            // if(!match) return next(CustomErrorHandler.wrongCredential());
+            if (!match) {
+                return res.status(400).json({ "error": "Please Enter correct current password!" });
+            }
+
+            var new_data = await StudentRegisterSchema.findByIdAndUpdate(st_id, { password: hashedPassword }, { new: true })
+
+            const message = "Student Password Changed Successfully.";
+            res.status(200).json({ message });
+
+
+
         } catch (err) {
             console.log(err);
             return next(CustomErrorHandler.somethingwrong());

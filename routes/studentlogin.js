@@ -12,7 +12,7 @@ router.use(express.json());
 
 // console.log("in login");
 
-router.get("/login/", (req, res) => {
+router.get("/", (req, res) => {
     res.render('studentlogin');
 });
 
@@ -31,11 +31,11 @@ router.use(passport.session());
 // console.log("here");
 passportConfigLogin(passport);
 
-router.get("/login/auth/google", passport.authenticate("login-google", { scope: ['profile', 'email'] }));
+router.get("/auth/google", passport.authenticate("login-google", { scope: ['profile', 'email'] }));
 
-router.get("/login/auth/google/callback",
+router.get("/auth/google/callback",
     passport.authenticate("login-google", { failureRedirect: '/student/login' }),
     studentController.googlelogin
 );
-router.post("/login/email", studentController.emaillogin);
+router.post("/email", studentController.emaillogin);
 export default router;

@@ -3,9 +3,13 @@ import mongoose from 'mongoose';
 const StudentInformationSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'StudentRegister', required: true },
     name: { type: String, required: true },
-    username: { type: String, required: true },
-    mobileNo: { type: String, required: true },
-    timezone: { type: String, required: true },
+    // username: { type: String, required: true },
+    // mobileNo: { type: String, required: true },
+    // timezone: { type: String, required: true },
+    email: { type: String, required: true},
+    board: { type: String, required: true },
+    city: { type: String, required: true },
+    school: { type: String, required: true },
     ownReferral: { type: String, required: true },
     referralHistory: [{
         userId: { type: mongoose.Schema.Types.ObjectId, ref: 'StudentRegister', required: true },
