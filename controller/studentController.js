@@ -1,4 +1,4 @@
-import { Student, StudentInformation, TokenStudent, StudentWallet, studentQuestions } from "../model/index.js";
+import { Student, StudentInformation, TokenStudent, StudentWallet, StudentQuestions } from "../model/index.js";
 import { StudentInformationSchema, StudentRegisterSchema, StudentWalletSchema, StudentQuestionsSchema } from "../schema/index.js";
 import { StudentRegisterValidatorSchema, refreshTokenValidatorSchema, StudentLoginValidatorSchema, StudentSetInfoValidatorSchema, StudentChangePasswordValidatorSchema, StudentGoogleRegister2ValidatorSchema } from "../validators/index.js";
 import CustomErrorHandler from "../service/CustomErrorHandler.js";

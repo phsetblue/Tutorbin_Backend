@@ -12,12 +12,9 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename)
 
-
-
-
 // initialize express app
 const app = express();
-
+// app.set('/uploads', path.join(__dirname, '/uploads'));
 app.set('views', path.join(__dirname, '/views'));
 app.set('view engine', 'ejs');
 
