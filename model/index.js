@@ -5,4 +5,5 @@ export { default as StudentInformation } from "./studentinformation.js";
 export { default as TokenStudent } from "./tokenstudent.js";
 export { default as StudentWallet } from "./studentwallet.js";
 export { default as StudentQuestions } from "./studentquestions.js";
+export { default as MainQuestions } from "./mainquestions.js";
 // export { default as Question } from "./question.js"

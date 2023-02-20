@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 const StudentQuestionsSchema = new mongoose.Schema({
     studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'StudentRegister', required: true },
     allQuestions: [{
+        questionId: { type: mongoose.Schema.Types.ObjectId, ref: 'MainQuestions', required: true },
         question: { type: String, required: true },
         questionPhoto: [{
             type: String,

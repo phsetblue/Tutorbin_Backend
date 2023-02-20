@@ -1,7 +1,7 @@
 import express from "express";
 import multer from 'multer';
-import { TokenStudent } from "../model/index.js";
-import { StudentQuestionsSchema } from "../schema/index.js";
+import { TokenStudent, MainQuestions } from "../model/index.js";
+import { MainQuestionsSchema, StudentQuestionsSchema, ImageSchema } from "../schema/index.js";
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -17,30 +17,17 @@ router.use(express.json());
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        // console.log(file);
-        // console.log(path.join(__dirname, '../uploads/'));
         const uploadDirectory = path.join(__dirname, '..', 'upload');
         console.log(uploadDirectory);
-        // const uploadDirectory = path.join(__dirname, '../uploads');
 
         // Create the upload directory if it doesn't exist
         fs.mkdir(uploadDirectory, { recursive: true }, function (err) {
             if (err) return cb(err);
             cb(null, uploadDirectory);
         });
-        // if (!fs.existsSync(uploadDirectory)) {
-        //     console.log("no");
-        //     fs.mkdirSync(uploadDirectory);
-        // } else {
-        //     console.log("yes");
-        // }
-        // cb(null, uploadDirectory);
     },
     filename: function (req, file, cb) {
-        // let aa = new Date().toISOString() + '-' + file.originalname;
-        // console.log(aa);
         const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
-
         cb(null, uniqueName);
     }
 });
@@ -73,14 +60,48 @@ router.post("/ask", upload.array('questionPhoto', 5), async (req, res) => {
 
         var st_id = rec_token._id;
 
-        const { question, questionType, questionSubject } = req.body;
+        // Save the uploaded images to the Image schema
+        const imagePromises = req.files.map(file => {
+            const img = new ImageSchema();
+            img.name = file.filename;
+            img.data = fs.readFileSync(file.path);
+            img.contentType = file.mimetype;
+            return img.save();
+        });
+
+        const images = await Promise.all(imagePromises);
+        const imageIds = images.map(image => image._id);
+
+        const { question, questionType, questionSubject, questionPrice, tutorPrice, adminPrice } = req.body;
         // console.log(req.file.filename);
+
+
+        const mainque = await MainQuestions.create({
+            question,
+            // questionPhoto: req.files.map(file => file.filename),
+            questionPhoto: imageIds,
+            questionType,
+            questionSubject,
+            status: "PENDING",
+            studentId: st_id,
+            questionPrice,
+            tutorPrice,
+            adminPrice,
+            createdAt: Date.now()
+        })
+
+
+        console.log(mainque);
+
+        const questionId = mainque._id;
 
         StudentQuestionsSchema.updateOne({ studentId: st_id }, {
             $push: {
                 allQuestions: [{
+                    questionId,
                     question,
-                    questionPhoto: req.files.map(file => file.filename),
+                    // questionPhoto: req.files.map(file => file.filename),
+                    questionPhoto: imageIds,
                     questionType,
                     questionSubject,
                     dateOfPosted: new Date(),
@@ -104,4 +125,88 @@ router.post("/ask", upload.array('questionPhoto', 5), async (req, res) => {
         // return next(error);
     }
 });
+
+router.get("/:id", async (req, res) => {
+    try {
+
+        /*
+
+      const question = await MainQuestions.findById({_id: req.params.id});
+    //   console.log(question);
+      if (!question) {
+        res.status(404).json({ error: "Question not found" });
+        return;
+      }
+  
+      // Fetch the images from the Image collection
+      const images = await ImageSchema.find({ _id: { $in: question.questionPhoto } });
+  
+      // Map the image documents to URLs
+      const imageUrls = images.map((image) => {
+        return `${req.protocol}://${req.get("host")}/images/${image.name}`;
+      });
+  
+      res.status(200).json({
+        question: {
+          id: question._id,
+          question: question.question,
+          questionPhoto: imageUrls,
+          questionType: question.questionType,
+          questionSubject: question.questionSubject,
+          status: question.status,
+          studentId: question.studentId,
+          questionPrice: question.questionPrice,
+          tutorPrice: question.tutorPrice,
+          adminPrice: question.adminPrice,
+          createdAt: question.createdAt,
+        },
+      });
+
+
+      */
+
+        const question = await MainQuestionsSchema.findById(req.params.id).populate('questionPhoto').exec();
+        if (!question) {
+            return res.status(404).json({ error: 'Question not found' });
+        }
+
+        console.log(question);
+
+        // Fetch the images from the Image collection
+        const images = await ImageSchema.find({ _id: { $in: question.questionPhoto } });
+        // console.log(images);
+
+        // Map the image data to base64 URLs
+        // const imageUrls = question.questionPhoto.map(image => {
+        const imageUrls = images.map((image) => {
+            // console.log(image);
+            return `data:${image.contentType};base64,${image.data.toString('base64')}`;
+        });
+
+        // res.render('questiondisplay', { question, imageUrls });
+        res.status(200).json({
+            question: {
+              id: question._id,
+              question: question.question,
+              questionPhoto: imageUrls,
+              questionType: question.questionType,
+              questionSubject: question.questionSubject,
+              status: question.status,
+              studentId: question.studentId,
+              questionPrice: question.questionPrice,
+              tutorPrice: question.tutorPrice,
+              adminPrice: question.adminPrice,
+              createdAt: question.createdAt,
+            },
+          });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
+
+
 export default router;
+
+

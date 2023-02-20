@@ -9,6 +9,12 @@ const StudentWalletSchema = new mongoose.Schema({
         amount: { type: Number, required: true },
         method: { type: String, required: true },
         date: { type: Date, required: true }
-    }]
+    }],
+    isSubscribed: { type: Boolean, default: false },
+    planType: { type: String, required: false },
+    planStartingDate: { type: Date, required: false },
+    planEndingDate: { type: Date, required: false },
+    questionsAvailable: { type: Boolean, default: false },
+    questionsRemaining: { type: Number, required: false, default: 0 }
 });
 export default mongoose.model('StudentWallet', StudentWalletSchema, 'StudentWallet');

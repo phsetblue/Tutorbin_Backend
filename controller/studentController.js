@@ -81,7 +81,7 @@ const studentController = {
             }
 
             var wal = await StudentWallet.create({studentId: user._id});
-            var st_qu = await studentQuestions.create({studentId: user._id});
+            var st_qu = await StudentQuestions.create({studentId: user._id});
 
             var info = user;
             var message = "User Registered Successfully.";
@@ -123,6 +123,7 @@ const studentController = {
 
 
             var aa = await Student.create(user);
+            // console.log(aa);
 
             if (!aa.error) {
                 // console.log(aa);
@@ -132,7 +133,7 @@ const studentController = {
                 var tt = await TokenStudentSchema.create({ _id: aa._id, token: refresh_token, expiresAt: new Date() });
                 let token = refresh_token;
                 var wal = await StudentWallet.create({studentId: aa._id});
-                var st_qu = await studentQuestions.create({studentId: aa._id});
+                var st_qu = await StudentQuestions.create({studentId: aa._id});
                 var info = aa;
                 var message = "User Registered Successfully.";
                 res.status(200).json({ info, token, message });
@@ -144,7 +145,8 @@ const studentController = {
             }
 
         } catch (error) {
-
+            console.log(error);
+            res.status(500).json(error);
         }
     },
     async googlelogin(req, res, next) {
