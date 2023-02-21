@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Student - Login</title>
+    <title>Tutor - Sign Up</title>
     <style>
         /* Add your custom styles here */
         body {
@@ -27,7 +27,8 @@
         }
 
         input[type="text"],
-        input[type="password"] {
+        input[type="password"],
+        select {
             width: 100%;
             padding: 10px;
             font-size: 16px;
@@ -72,12 +73,20 @@
 
 <body>
     <div class="container">
-        <h1>Login</h1>
-        <form action="/student/login/email" method="post">
+        <h1>Sign Up</h1>
+        <form action="/tutor/register/email" method="post">
             <input type="text" name="email" placeholder="Email" required />
             <input type="password" name="password" placeholder="Password" required />
-            <input type="submit" value="Login">
-            <a href="/student/login/auth/google" class="google-auth">Login with Google</a>
+            <input type="password" name="rePassword" placeholder="Re-enter Password" required />
+            <select name="class">
+                <option value="">Select Class</option>
+                <option value="class1">Class 1</option>
+                <option value="class2">Class 2</option>
+                <!-- Add more options as per your requirements -->
+            </select>
+            <input type="text" name="referralCode" placeholder="Referral Code (optional)" />
+            <input type="submit" value="Sign Up">
+            <a href="/tutor/register/auth/google" class="google-auth">Sign Up with Google</a>
         </form>
     </div>
     <script>
@@ -87,35 +96,29 @@
 
             let data = {
                 email: form.elements.email.value,
-                password: form.elements.password.value
-
+                password: form.elements.password.value,
+                class: form.elements.class.value
             };
 
-            // Send a request to the server with the data
-            fetch('/student/login/email', {
-                method: 'post',
-                body: JSON.stringify(data),
-                headers: {
-                    'Content-Type': 'application/json'
+            if (form.elements.referralCode.value.trim() !== "") {
+                data.referralCode = form.elements.referralCode.value;
+            }
+            console.log(data);
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", "/tutor/register/email", true);
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                    let response = JSON.parse(xhr.responseText);
+                    console.log(response);
+                    // Show the response to the user, for example using an alert
+                    alert(response.token);
                 }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.message) {
-                        // Redirect the user to the dashboard if the login was successful
-                        window.location.href = "/student/dashboard";
-                    } else {
-                        // Display an error message if the login was unsuccessful
-                        let errorMessage = document.createElement("p");
-                        errorMessage.innerText = data.error;
-                        errorMessage.style.color = "red";
-                        form.appendChild(errorMessage);
-                    }
-                })
-                .catch(error => console.error(error));
+            };
+            xhr.send(JSON.stringify(data));
         });
-    </script>
 
+    </script>
 </body>
 
 </html>

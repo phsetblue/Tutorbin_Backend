@@ -1,12 +1,12 @@
-import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, CALLBACK_URL_REGISTER } from './index.js'
+import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, STUDENT_CALLBACK_URL_REGISTER } from './index.js'
 import gs from 'passport-google-oauth20';
 const { Strategy: GoogleStrategy } = gs;
 
-export const passportConfigRegister = passport => {
-    passport.use("register-google",new GoogleStrategy({
+export const passportConfigStudentRegister = passport => {
+    passport.use("student-register-google",new GoogleStrategy({
         clientID: GOOGLE_CLIENT_ID,
         clientSecret: GOOGLE_CLIENT_SECRET,
-        callbackURL: CALLBACK_URL_REGISTER
+        callbackURL: STUDENT_CALLBACK_URL_REGISTER
     },
         (accessToken, refreshToken, profile, done) => {
             // console.log("in register");

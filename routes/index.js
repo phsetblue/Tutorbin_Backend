@@ -1,6 +1,8 @@
 import express from "express";
-import routeslogin from "./studentlogin.js";
-import routesregister from "./studentregister.js";
+import studentRoutesLogin from "./studentlogin.js";
+import studentRoutesRegister from "./studentregister.js";
+import tutorRouteLogin from "./tutorlogin.js";
+import tutorRouteRegister from "./tutorregister.js";
 import stquestion from "./question.js";
 import { studentController, questionController } from "../controller/index.js";
 const router = express.Router();
@@ -12,12 +14,19 @@ const router = express.Router();
 router.use(express.urlencoded({ extended: false }));
 router.use(express.json());
 
-router.use("/student/login", routeslogin);
-router.use("/student/register", routesregister);
+router.use("/student/login", studentRoutesLogin);
+router.use("/student/register", studentRoutesRegister);
 router.post("/student/logout", studentController.logout);
 router.get("/student/getinfo", studentController.getinfo);
 router.post("/student/setinfo", studentController.setinfo);
 router.post("/student/changepassword", studentController.changepassword);
+
+
+
+router.use("/tutor/login", tutorRouteLogin);
+router.use("/tutor/register", tutorRouteRegister);
+
+
 // router.post("/tutor/register", tutorController.register);
 // router.post("/tutor/login", tutorController.login);
 // router.post("/tutor/logout", tutorController.logout);

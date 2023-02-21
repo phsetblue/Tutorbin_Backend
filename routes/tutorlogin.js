@@ -1,10 +1,10 @@
 import express from "express";
-import { studentController } from "../controller/index.js";
-import { passportConfigStudentLogin } from '../config/passportstudentlogin.js';
+import { tutorController } from "../controller/index.js";
+import { passportConfigTutorLogin } from '../config/passporttutorlogin.js';
 import passport from 'passport';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
-// import studentController from "../controller/studentController.js";
+// import tutorController from "../controller/tutorController.js";
 const router = express.Router();
 
 router.use(express.urlencoded({ extended: false }));
@@ -13,7 +13,7 @@ router.use(express.json());
 // console.log("in login");
 
 router.get("/", (req, res) => {
-    res.render('studentlogin');
+    res.render('tutorlogin');
 });
 
 
@@ -29,13 +29,13 @@ router.use(passport.session());
 
 // Passport Configuration
 // console.log("here");
-passportConfigStudentLogin(passport);
+passportConfigTutorLogin(passport);
 
-router.get("/auth/google", passport.authenticate("student-login-google", { scope: ['profile', 'email'] }));
+router.get("/auth/google", passport.authenticate("tutor-login-google", { scope: ['profile', 'email'] }));
 
 router.get("/auth/google/callback",
-    passport.authenticate("student-login-google", { failureRedirect: '/student/login' }),
-    studentController.googlelogin
+    passport.authenticate("tutor-login-google", { failureRedirect: '/tutor/login' }),
+    tutorController.googlelogin
 );
-router.post("/email", studentController.emaillogin);
+router.post("/email", tutorController.emaillogin);
 export default router;

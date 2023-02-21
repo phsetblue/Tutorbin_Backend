@@ -1,11 +1,11 @@
 import express from "express";
-import { studentController } from "../controller/index.js";
-import { passportConfigStudentRegister } from '../config/passportstudentregister.js';
+import { tutorController } from "../controller/index.js";
+import { passportConfigTutorRegister } from '../config/passporttutorregister.js';
 import passport from 'passport';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
 // const p1 = passport;
-// import studentController from "../controller/studentController.js";
+// import tutorController from "../controller/tutorController.js";
 const router = express.Router();
 
 router.use(express.urlencoded({ extended: false }));
@@ -21,20 +21,20 @@ router.use(passport.initialize());
 router.use(passport.session());
 
 // Passport Configuration
-await passportConfigStudentRegister(passport);
+await passportConfigTutorRegister(passport);
 
 router.get("/", (req, res) => {
-    res.render('studentregister');
+    res.render('tutorregister');
 });
 
-router.get("/auth/google", passport.authenticate("student-register-google", { scope: ['profile', 'email'] }));
+router.get("/auth/google", passport.authenticate("tutor-register-google", { scope: ['profile', 'email'] }));
 
 router.get("/auth/google/callback",
-    passport.authenticate("student-register-google", { failureRedirect: '/student/register' }),
-    studentController.googleregister
+    passport.authenticate("tutor-register-google", { failureRedirect: '/tutor/register' }),
+    tutorController.googleregister
 );
 
-router.post("/email", studentController.emailregister);
-router.post("/google", studentController.googleregister2);
+router.post("/email", tutorController.emailregister);
+router.post("/google", tutorController.googleregister2);
 
 export default router;
