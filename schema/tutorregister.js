@@ -6,7 +6,10 @@ const TutorRegisterSchema = new mongoose.Schema({
     googleId: { type: String, required: false },
     registerType: { type: String, enum: ['google', 'email'], required: true },
     referralCode: { type: String, optional: false },
-    allDetailsFilled: { type: Boolean, required: true, default: false },
+    profilephoto: { type: String, optional: false },
+    personalDetailsFilled: { type: Boolean, required: true, default: false },
+    professionalDetailsFilled: { type: Boolean, required: true, default: false },
+    subjectDetailsFilled: { type: Boolean, required: true, default: false },
     isVerified: { type: Boolean, required: true, default: false },
     isSuspended: { type: Boolean, required: true, default: false },
     suspensionEndDate: { type: Date, required: false }

@@ -6,9 +6,11 @@ const TokenTutorSchema = new mongoose.Schema({
     expiresAt: {
         type: Date,
         required: true,
-        expires: 60 // token expires in 60 seconds
+        // expires: 60 // token expires in 60 seconds
       }
 
 });
+
+TokenTutorSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 3600*24 });
 
 export default mongoose.model('TokenTutor', TokenTutorSchema, 'TutorTokens');

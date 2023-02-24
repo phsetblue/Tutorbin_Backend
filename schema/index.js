@@ -9,7 +9,10 @@ export { default as StudentQuestionsSchema } from "./studentquestions.js";
 export { default as MainQuestionsSchema } from "./mainquestions.js";
 export { default as TutorQuestionsSchema } from "./tutorquestions.js";
 export { default as TutorSubjectsSchema } from "./tutorsubjects.js";
-export { default as TutorInformationSchema } from "./tutorinformation.js";
+export { default as TutorPersonalSchema } from "./tutorpersonal.js";
+export { default as TutorProfessionalSchema } from "./tutorprofessional.js";
+export { default as TutorRegisterSchema } from "./tutorregister.js"
 export { default as TutorBankDetailsSchema } from "./tutorbankdetails.js";
 export { default as TutorWalletSchema } from "./tutorwallet.js";
 export { default as ImageSchema } from "./image.js"
+export { default as TutorDocumentSchema } from "./tutordocument.js";

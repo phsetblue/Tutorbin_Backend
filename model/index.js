@@ -12,11 +12,13 @@ export { default as MainQuestions } from "./mainquestions.js";
 
 
 
-// export { default as Tutor } from "./tutor.js";
-// export { default as TutorInformation } from "./tutorinformation.js";
-// export { default as TokenTutor } from "./tokentutor.js";
-// export { default as TutorWallet } from "./tutorwallet.js";
-// export { default as TutorQuestions } from "./tutorquestions.js";
+export { default as Tutor } from "./tutor.js";
+export { default as TutorPersonal } from "./tutorpersonal.js";
+export { default as TutorProfessional } from "./tutorprofessional.js";
+export { default as TokenTutor } from "./tokentutor.js";
+export { default as TutorWallet } from "./tutorwallet.js";
+export { default as TutorQuestions } from "./tutorquestions.js";
+export { default as TutorBankDetails } from "./tutorbankdetails.js";
 
 
 // export { default as Question } from "./question.js"

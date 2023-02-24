@@ -36,5 +36,9 @@ router.get("/auth/google/callback",
 
 router.post("/email", tutorController.emailregister);
 router.post("/google", tutorController.googleregister2);
+router.post("/personal", tutorController.personal);
+router.post("/professional", tutorController.professional);
+router.post("/addsubjects", tutorController.addSubjects);
+router.post("/bankdetails", tutorController.bankdetails);
 
 export default router;

@@ -10,6 +10,9 @@ export { default as StudentGoogleRegister2ValidatorSchema } from "./studentgoogl
 
 export { TutorRegisterValidatorSchema } from "./tutorregisterValidator.js";
 export { default as TutorLoginValidatorSchema} from "./tutorloginValidator.js";
-export { default as TutorSetInfoValidatorSchema } from "./tutorSetInfoValidator.js";
+export { default as TutorPersonalValidatorSchema } from "./tutorPersonalValidator.js";
+export { default as TutorProfessionalValidatorSchema } from "./tutorProfessionalValidator.js";
 export { default as TutorChangePasswordValidatorSchema } from "./tutorchangepasswordValidator.js";
 export { default as TutorGoogleRegister2ValidatorSchema } from "./tutorgoogleregister2Validator.js";
+export { default as TutorBankDetailsValidatorSchema } from "./tutorbankdetailsValidator.js";
+export { default as TutorAddSubjectValidatorSchema } from "./tutoraddsubjectValidator.js";

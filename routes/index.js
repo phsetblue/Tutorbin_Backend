@@ -4,7 +4,7 @@ import studentRoutesRegister from "./studentregister.js";
 import tutorRouteLogin from "./tutorlogin.js";
 import tutorRouteRegister from "./tutorregister.js";
 import stquestion from "./question.js";
-import { studentController, questionController } from "../controller/index.js";
+import { studentController, tutorController,questionController } from "../controller/index.js";
 const router = express.Router();
 
 
@@ -25,6 +25,7 @@ router.post("/student/changepassword", studentController.changepassword);
 
 router.use("/tutor/login", tutorRouteLogin);
 router.use("/tutor/register", tutorRouteRegister);
+router.post("/tutor/logout", tutorController.logout);
 
 
 // router.post("/tutor/register", tutorController.register);
@@ -43,3 +44,5 @@ router.use("/question", stquestion);
 
 
 export default router;
+
+
