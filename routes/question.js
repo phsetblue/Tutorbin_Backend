@@ -1,7 +1,7 @@
 import express from "express";
 import multer from 'multer';
 import { TokenStudent, MainQuestions } from "../model/index.js";
-import { MainQuestionsSchema, StudentQuestionsSchema, ImageSchema } from "../schema/index.js";
+import { MainQuestionsSchema, StudentQuestionsSchema, ImageSchema, TutorSubjectsSchema, TutorTimingSchema, TutorRegisterSchema } from "../schema/index.js";
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -58,7 +58,7 @@ router.post("/ask", upload.array('questionPhoto', 5), async (req, res) => {
             res.status(400).json({ "error": "Invalid refresh token!" });
         }
 
-        console.log(req);
+        // console.log(req);
 
         var st_id = rec_token._id;
 
@@ -120,8 +120,98 @@ router.post("/ask", upload.array('questionPhoto', 5), async (req, res) => {
             console.log('Array of questions pushed:', result);
         });
 
+        // sent to tutor
 
 
+        const subject = mainque.questionSubject;
+
+        // const tutors = await Tutortiming.find({ subject })
+        //     .populate('tutorId')
+        //     .sort('-screenTime');
+
+        const tutors = await TutorSubjectsSchema.find({ subjects: subject })
+            // .populate("tutorId");
+            .populate({
+                path: 'tutorId',
+                model: TutorRegisterSchema,
+                select: '_id',
+                match: {
+                    questionassigned: false,
+                    isVerified: true,
+                    isSuspended: false,
+                },
+            })
+        // .populate({
+        //     path: "tutorId",
+        //     model: TutorTimingSchema,
+        // })
+        // .sort('-screenTime');
+
+        // console.log(tutors);
+        const filteredData = tutors.filter(doc => doc.tutorId !== null);
+
+        console.log(filteredData);
+
+        const ids = filteredData.map(item => item.tutorId._id);
+
+        const newdata = await TutorTimingSchema.find({ tutorId: { $in: ids } })
+            // .populate('tutorId')
+            // .exec((err, docs) => {
+            //     if (err) {
+            //         console.error(err);
+            //     } else {
+            //         console.log(docs);
+            //     }
+            // });
+
+        console.log('newdata == ', newdata);
+        // let assignedTo = null;
+
+        // Iterate through each tutor and assign the question to the first available tutor
+        // for (const tutorTiming of tutors) {
+        //     const tutor = tutorTiming.tutorId;
+
+        //     // Check if the tutor has not already been assigned a question
+        //     if (!tutor.questionassigned) {
+        //         // Assign the question to the tutor
+        //         const mainQuestion = new MainQuestionsSchema.findByIdAndUpdate(questionId, {
+        //             tutorId: tutor._id,
+        //         }, { new: true });
+        //         // const savedMainQuestion = await mainQuestion.save();
+
+        //         // Add the question to the tutor's list of assigned questions
+        //         const tutorQuestion = new TutorQuestions({
+        //             tutorId: tutor._id,
+        //             allQuestions: [
+        //                 {
+        //                     questionId,
+        //                     question,
+        //                     questionType: 'text',
+        //                     timeRemaining: 600,
+        //                 },
+        //             ],
+        //             stats: {
+        //                 answeredQuestions: 0,
+        //                 skippedQuestions: 0,
+        //             },
+        //         });
+        //         await tutorQuestion.save();
+
+        //         // Update the tutor's questionassigned field to true
+        //         await TutorRegister.updateOne({ _id: tutor._id }, { $set: { questionassigned: true } });
+
+        //         assignedTo = tutor;
+        //         break;
+        //     }
+        // }
+
+        // if (assignedTo) {
+        //     res.json({ message: `Question assigned to tutor ${assignedTo.email}` });
+        // } else {
+        //     res.json({ message: 'No tutor available to assign the question' });
+        // }
+
+        // end of sent to tutor
         res.status(200).json({ message: 'Question posted successfully' });
     } catch (error) {
         console.log("dfsd");
@@ -191,19 +281,19 @@ router.get("/:id", async (req, res) => {
         // res.render('questiondisplay', { question, imageUrls });
         res.status(200).json({
             question: {
-              id: question._id,
-              question: question.question,
-              questionPhoto: imageUrls,
-              questionType: question.questionType,
-              questionSubject: question.questionSubject,
-              status: question.status,
-              studentId: question.studentId,
-              questionPrice: question.questionPrice,
-              tutorPrice: question.tutorPrice,
-              adminPrice: question.adminPrice,
-              createdAt: question.createdAt,
+                id: question._id,
+                question: question.question,
+                questionPhoto: imageUrls,
+                questionType: question.questionType,
+                questionSubject: question.questionSubject,
+                status: question.status,
+                studentId: question.studentId,
+                questionPrice: question.questionPrice,
+                tutorPrice: question.tutorPrice,
+                adminPrice: question.adminPrice,
+                createdAt: question.createdAt,
             },
-          });
+        });
     } catch (error) {
         console.log(error);
         res.status(500).json({ error: "Server error" });

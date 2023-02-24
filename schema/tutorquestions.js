@@ -6,7 +6,18 @@ const TutorQuestionsSchema = new mongoose.Schema({
         questionId: { type: mongoose.Schema.Types.ObjectId, ref: 'MainQuestions', required: true },
         question: { type: String, required: true },
         questionType: { type: String, required: true },
-        timeRemaining: { type: Number, required: true }
+        questionSubject: { type: String, required: true },
+        questionPhoto: [{
+            type: String,
+            required: true
+        }],
+        tutorPrice: { type: Number, required: true },
+        answer: { type: String, required: false },
+        answerPhoto: [{
+            type: String,
+            required: true
+        }]
+        // timeRemaining: { type: Number, required: true }
     }],
     stats: {
         answeredQuestions: { type: Number, required: true },
