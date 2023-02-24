@@ -16,3 +16,4 @@ export { default as TutorBankDetailsSchema } from "./tutorbankdetails.js";
 export { default as TutorWalletSchema } from "./tutorwallet.js";
 export { default as ImageSchema } from "./image.js"
 export { default as TutorDocumentSchema } from "./tutordocument.js";
+export { default as TutorTimingSchema } from "./tutortiming.js";

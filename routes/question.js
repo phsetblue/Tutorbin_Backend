@@ -58,6 +58,8 @@ router.post("/ask", upload.array('questionPhoto', 5), async (req, res) => {
             res.status(400).json({ "error": "Invalid refresh token!" });
         }
 
+        console.log(req);
+
         var st_id = rec_token._id;
 
         // Save the uploaded images to the Image schema
@@ -71,6 +73,7 @@ router.post("/ask", upload.array('questionPhoto', 5), async (req, res) => {
 
         const images = await Promise.all(imagePromises);
         const imageIds = images.map(image => image._id);
+        console.log(imageIds);
 
         const { question, questionType, questionSubject, questionPrice, tutorPrice, adminPrice } = req.body;
         // console.log(req.file.filename);
@@ -116,6 +119,8 @@ router.post("/ask", upload.array('questionPhoto', 5), async (req, res) => {
             }
             console.log('Array of questions pushed:', result);
         });
+
+
 
         res.status(200).json({ message: 'Question posted successfully' });
     } catch (error) {

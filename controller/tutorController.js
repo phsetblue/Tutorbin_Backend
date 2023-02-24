@@ -1,6 +1,6 @@
 import { Tutor, TutorPersonal, TutorProfessional, TokenTutor, TutorWallet, TutorQuestions, TutorBankDetails } from "../model/index.js";
-import { TutorPersonalSchema, TutorProfessionalSchema, TutorRegisterSchema, TutorWalletSchema, TutorQuestionsSchema, TutorDocumentSchema, TutorSubjectsSchema, TutorBankDetailsSchema } from "../schema/index.js";
-import { TutorRegisterValidatorSchema, refreshTokenValidatorSchema, TutorLoginValidatorSchema, TutorPersonalValidatorSchema, TutorProfessionalValidatorSchema, TutorChangePasswordValidatorSchema, TutorGoogleRegister2ValidatorSchema, TutorAddSubjectValidatorSchema, TutorBankDetailsValidatorSchema } from "../validators/index.js";
+import { TutorPersonalSchema, TutorProfessionalSchema, TutorRegisterSchema, TutorWalletSchema, TutorQuestionsSchema, TutorDocumentSchema, TutorSubjectsSchema, TutorBankDetailsSchema, TutorTimingSchema } from "../schema/index.js";
+import { TutorRegisterValidatorSchema, refreshTokenValidatorSchema, TutorLoginValidatorSchema, TutorPersonalValidatorSchema, TutorProfessionalValidatorSchema, TutorChangePasswordValidatorSchema, TutorGoogleRegister2ValidatorSchema, TutorAddSubjectValidatorSchema, TutorBankDetailsValidatorSchema, TutorAddScreenTimeValidatorSchema } from "../validators/index.js";
 import CustomErrorHandler from "../service/CustomErrorHandler.js";
 import bcrypt from "bcrypt";
 import JwtService from "../service/JwtService.js";
@@ -490,6 +490,60 @@ const tutorController = {
             }
 
 
+        } catch (error) {
+            console.log(error);
+            res.status(500).json(error);
+        }
+    },
+    async addscreentime(req, res, next) {
+        try {
+            const { error } = TutorAddScreenTimeValidatorSchema.validate(req.body);
+            if (error) {
+                return res.status(500).json({ "error": error.message });
+            }
+            let rec_token = await TokenTutor.fetchByToken({ token: req.body.token });
+            if (rec_token === null || !rec_token.token) {
+                return res.status(400).json({ "error": "Invalid refresh token!" });
+            }
+
+            var tutorId = rec_token._id;
+            console.log('tutor id = ', tutorId);
+            const { screenTime } = req.body;
+
+            const currentDate = new Date();
+            const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0, 23, 59, 59, 999);
+            // const endOfMonth = "2023-03-28T18:29:59.999Z";
+            // Check if a document with this tutorId exists in the collection
+            let tutorTiming = await TutorTimingSchema.findOne({ tutorId }).exec();
+
+            // If not, create a new document with default values
+            if (!tutorTiming) {
+                tutorTiming = new TutorTimingSchema({
+                    tutorId,
+                    screenTime: 0,
+                    updatedAt: currentDate,
+                });
+            }
+
+            // Check if the updatedAt field is in the same month as the current date
+            console.log("tutor- updatedat == ", tutorTiming.updatedAt);
+            console.log("current end of month == ", endOfMonth);
+
+            if (tutorTiming.updatedAt < endOfMonth) {
+                tutorTiming.screenTime += screenTime;
+                tutorTiming.updatedAt = currentDate;
+            } else {
+                tutorTiming.screenTime = screenTime;
+                tutorTiming.updatedAt = currentDate;
+            }
+
+            // Save the updated document
+            await tutorTiming.save();
+
+            res.status(200).json({
+                info: tutorTiming,
+                message: "Tutor Timing Updated."
+            });
         } catch (error) {
             console.log(error);
             res.status(500).json(error);

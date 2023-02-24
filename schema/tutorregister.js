@@ -12,6 +12,7 @@ const TutorRegisterSchema = new mongoose.Schema({
     subjectDetailsFilled: { type: Boolean, required: true, default: false },
     isVerified: { type: Boolean, required: true, default: false },
     isSuspended: { type: Boolean, required: true, default: false },
-    suspensionEndDate: { type: Date, required: false }
+    suspensionEndDate: { type: Date, required: false },
+    questionassigned: { type: Boolean, required: true, default: false }
 });
 export default mongoose.model('TutorRegister', TutorRegisterSchema, 'TutorRegister');

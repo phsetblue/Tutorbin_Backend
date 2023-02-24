@@ -16,3 +16,8 @@ export { default as TutorChangePasswordValidatorSchema } from "./tutorchangepass
 export { default as TutorGoogleRegister2ValidatorSchema } from "./tutorgoogleregister2Validator.js";
 export { default as TutorBankDetailsValidatorSchema } from "./tutorbankdetailsValidator.js";
 export { default as TutorAddSubjectValidatorSchema } from "./tutoraddsubjectValidator.js";
+export { default as TutorAddScreenTimeValidatorSchema } from "./tutoraddscreentimeValidator.js";
+
+
+export { default as AdminRegisterValidatorSchema } from "./adminregisterValidator.js";
+export { default as AdminLoginValidatorSchema } from "./adminloginValidator.js";

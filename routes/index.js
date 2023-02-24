@@ -4,7 +4,7 @@ import studentRoutesRegister from "./studentregister.js";
 import tutorRouteLogin from "./tutorlogin.js";
 import tutorRouteRegister from "./tutorregister.js";
 import stquestion from "./question.js";
-import { studentController, tutorController,questionController } from "../controller/index.js";
+import { studentController, tutorController, questionController, adminController } from "../controller/index.js";
 const router = express.Router();
 
 
@@ -26,11 +26,8 @@ router.post("/student/changepassword", studentController.changepassword);
 router.use("/tutor/login", tutorRouteLogin);
 router.use("/tutor/register", tutorRouteRegister);
 router.post("/tutor/logout", tutorController.logout);
+router.post("/tutor/screentime", tutorController.addscreentime);
 
-
-// router.post("/tutor/register", tutorController.register);
-// router.post("/tutor/login", tutorController.login);
-// router.post("/tutor/logout", tutorController.logout);
 
 // router.post("/student/registerandask", studentController.regandask);
 // router.post("/question/ask", upload.array('questionImage', 5), questionController.ask);
@@ -38,8 +35,12 @@ router.post("/tutor/logout", tutorController.logout);
 router.use("/question", stquestion);
 
 // router.post("/question/answer/:id", questionController.answer);
-// router.post("/admin/register", adminController.register);
-// router.post("/admin/login", adminController.login);
+
+
+
+
+router.post("/admin/register", adminController.register);
+router.post("/admin/login", adminController.login);
 // router.post("/admin/logout", adminController.logout);
 
 
