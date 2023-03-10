@@ -1,10 +1,9 @@
-import { Admin } from "../model/index.js";
-import { AdminSchema } from "../schema/index.js";
-import { AdminRegisterValidatorSchema, AdminLoginValidatorSchema, refreshTokenValidatorSchema } from "../validators/index.js";
+import { Admin, TokenAdmin } from "../model/index.js";
+import { AdminSchema, QuestionTimingSchema, TokenAdminSchema } from "../schema/index.js";
+import { AdminRegisterValidatorSchema, AdminLoginValidatorSchema, refreshTokenValidatorSchema, AdminSetQuestionTimingValidatorSchema } from "../validators/index.js";
 import CustomErrorHandler from "../service/CustomErrorHandler.js";
 import bcrypt from "bcrypt";
 import JwtService from "../service/JwtService.js";
-import { TokenAdminSchema } from "../schema/index.js";
 import { APP_URL, SALT_FACTOR } from "../config/index.js";
 import crypto from 'crypto';
 import multer from 'multer';
@@ -76,7 +75,7 @@ const adminController = {
                 email,
                 password: req.body.password,
             });
-        
+
             var aa = await Admin.create(user);
             // console.log(aa);
 
@@ -137,7 +136,7 @@ const adminController = {
                     // console.log("already exist");
                 }
             } catch (error) {
-                
+
                 console.log("error generated");
             }
             var message = "Tutor Login Successfully.";
@@ -203,12 +202,77 @@ const adminController = {
             const message = "Tutor Password Changed Successfully.";
             res.status(200).json({ message });
 
-
-
         } catch (err) {
             console.log(err);
             return next(CustomErrorHandler.somethingwrong());
         }
     },
+    async setquestiontiming(req, res, next) {
+        try {
+            const { error } = AdminSetQuestionTimingValidatorSchema.validate(req.body);
+            if (error) {
+                return res.status(400).json({ "error": error.message });
+            }
+            // console.log({ token: req.body.token });
+            let rec_token = await TokenAdmin.fetchByToken({ token: req.body.token });
+            if (rec_token === null || !rec_token.token) {
+                return res.status(400).json({ "error": "Invalid refresh token!" });
+            }
+
+            const { Type, first_time, second_time, skip_time, remaining_time } = req.body;
+
+            var old_sch = await QuestionTimingSchema.findOne({ Type: Type });
+
+            console.log(old_sch);   
+
+            if (!old_sch) {
+                var new_sch;
+                try{
+                new_sch = await QuestionTimingSchema.create({
+                    Type,
+                    first_time,
+                    second_time,
+                    skip_time,
+                    remaining_time
+                });
+                } catch(error) {
+                    console.log(error);
+                }
+
+                var as = await new_sch.save();
+                console.log("dgfgdfh: ", as);
+
+                if (!as) {
+                    return res.status(500).json({ message: "Internal Server Error!" });
+                }
+
+                return res.status(200).json({ message: "Details Created Successfully." });
+
+            } else  {
+                const new_sch = await QuestionTimingSchema.findByIdAndUpdate(old_sch._id,{
+                    Type, 
+                    first_time, 
+                    second_time, 
+                    skip_time, 
+                    remaining_time
+                }, {new: true});
+                console.log(new_sch);
+    
+                // var as = await new_sch.save();
+    
+                if(!new_sch) {
+                    return res.status(500).json({message: "Internal Server Error!"});
+                }
+    
+                return res.status(200).json({message: "Details Updated Successfully."});
+    
+            }
+
+
+        } catch (error) {
+            console.log("error : ", error);
+            return res.status(500).json({ message: "Internal Server Error!" });
+        }
+    }
 };
 export default adminController;

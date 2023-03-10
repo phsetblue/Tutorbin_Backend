@@ -44,6 +44,9 @@ router.post("/admin/login", adminController.login);
 // router.post("/admin/logout", adminController.logout);
 
 
+router.post("/admin/setquestiontiming", adminController.setquestiontiming);
+
+
 export default router;
 
 

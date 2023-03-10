@@ -11,6 +11,8 @@ const TutorTimingSchema = new mongoose.Schema(
 
 TutorTimingSchema.index({ screenTime: -1 });
 
+export default mongoose.model( "TutorTiming", TutorTimingSchema, "TutorTiming" );
+
 // // pre hook to update screenTime and updatedAt fields
 // TutorTimingSchema.pre("save", function (next) {
 //     const currentDate = new Date();
@@ -28,5 +30,5 @@ TutorTimingSchema.index({ screenTime: -1 });
 //     next();
 // });
 
-export default mongoose.model( "TutorTiming", TutorTimingSchema, "TutorTiming" );
+
 

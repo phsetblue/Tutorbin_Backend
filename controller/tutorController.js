@@ -179,15 +179,21 @@ const tutorController = {
                 refresh_token = await JwtService.sign({ _id: aa._id });
                 var tt = await TokenTutorSchema.create({ _id: aa._id, token: refresh_token, expiresAt: new Date() });
                 let token = refresh_token;
-                var wal = await TutorWallet.create({ studentId: aa._id });
-                var st_qu = await TutorQuestions.create({ studentId: aa._id });
+                var wal = await TutorWallet.create({ tutorId: aa._id });
+                if(!wal) {
+                    return res.status(400).json({ "error": "No created Tutor Wallet" });
+                }
+                var st_qu = await TutorQuestions.create({ tutorId: aa._id });
+                if(!st_qu) {
+                    return res.status(400).json({ "error": "No created Tutor Questions" });
+                }
                 var info = aa;
                 var message = "Tutor Registered Successfully.";
-                res.status(200).json({ info, token, message });
+                return res.status(200).json({ info, token, message });
                 // res.json(aa);
                 // res.redirect("/student/home");
             } else {
-                res.status(400).json({ "error": aa.error });
+                return res.status(400).json({ "error": aa.error });
                 // res.redirect("/student/register");
             }
 

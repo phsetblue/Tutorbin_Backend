@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const TutorWalletSchema = new mongoose.Schema({
     tutorId: { type: mongoose.Schema.Types.ObjectId, ref: 'TutorRegister', required: true },
-    balance: { type: Number, required: true },
+    balance: { type: Number, required: true, default: 0 },
     balanceHistory: [{
         date: { type: Date, required: true },
         amount: { type: Number, required: true }

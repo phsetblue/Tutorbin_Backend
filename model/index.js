@@ -26,3 +26,4 @@ export { default as TutorBankDetails } from "./tutorbankdetails.js";
 
 
 export { default as Admin } from "./admin.js";
+export { default as TokenAdmin } from "./tokenadmin.js";

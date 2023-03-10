@@ -1,11 +1,13 @@
 import express from "express";
 import multer from 'multer';
+import  { findTutorAndAssignQuestion } from "../controller/findTutorAndAssignQuestion.js";
 import { TokenStudent, MainQuestions } from "../model/index.js";
-import { MainQuestionsSchema, StudentQuestionsSchema, ImageSchema, TutorSubjectsSchema, TutorTimingSchema, TutorRegisterSchema } from "../schema/index.js";
+import { MainQuestionsSchema, StudentQuestionsSchema, ImageSchema, TutorSubjectsSchema, TutorTimingSchema, TutorRegisterSchema, TutorQuestionsSchema, QuestionTimingSchema } from "../schema/index.js";
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import fs from 'fs';
+import questiontiming from "../schema/questiontiming.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename)
@@ -78,6 +80,10 @@ router.post("/ask", upload.array('questionPhoto', 5), async (req, res) => {
         const { question, questionType, questionSubject, questionPrice, tutorPrice, adminPrice } = req.body;
         // console.log(req.file.filename);
 
+        const now = new Date();
+        const oneDay = 24 * 60 * 60 * 1000;
+        const twoDays = 2 * oneDay;
+        const threeDays = 3 * oneDay;
 
         const mainque = await MainQuestions.create({
             question,
@@ -90,7 +96,11 @@ router.post("/ask", upload.array('questionPhoto', 5), async (req, res) => {
             questionPrice,
             tutorPrice,
             adminPrice,
-            createdAt: Date.now()
+            createdAt: now,
+            onedayafter_tutor_end: new Date(now.getTime() + oneDay),
+            twodayafter_admin_end: new Date(now.getTime() + twoDays),
+            threedayafter_unsolved_end: new Date(now.getTime() + threeDays),
+            whomto_ask: "tutor"
         })
 
 
@@ -98,10 +108,10 @@ router.post("/ask", upload.array('questionPhoto', 5), async (req, res) => {
 
         const questionId = mainque._id;
 
-        StudentQuestionsSchema.updateOne({ studentId: st_id }, {
+        StudentQuestionsSchema.findOneAndUpdate({ studentId: st_id }, {
             $push: {
                 allQuestions: [{
-                    questionId,
+                    questionId: questionId,
                     question,
                     // questionPhoto: req.files.map(file => file.filename),
                     questionPhoto: imageIds,
@@ -116,103 +126,24 @@ router.post("/ask", upload.array('questionPhoto', 5), async (req, res) => {
                 console.log("dsds");
                 console.error(error);
                 return;
+            } else {
+                console.log('Array of questions pushed:', result);
             }
-            console.log('Array of questions pushed:', result);
         });
 
         // sent to tutor
 
+        var new_status = await findTutorAndAssignQuestion(mainque);
 
-        const subject = mainque.questionSubject;
+        if(new_status) {
+            res.status(200).json({ message: 'Question posted successfully' });
+        } else {
+            res.status(400).json({ message: 'Question posting was unsuccessful!' });
+        }
 
-        // const tutors = await Tutortiming.find({ subject })
-        //     .populate('tutorId')
-        //     .sort('-screenTime');
-
-        const tutors = await TutorSubjectsSchema.find({ subjects: subject })
-            // .populate("tutorId");
-            .populate({
-                path: 'tutorId',
-                model: TutorRegisterSchema,
-                select: '_id',
-                match: {
-                    questionassigned: false,
-                    isVerified: true,
-                    isSuspended: false,
-                },
-            })
-        // .populate({
-        //     path: "tutorId",
-        //     model: TutorTimingSchema,
-        // })
-        // .sort('-screenTime');
-
-        // console.log(tutors);
-        const filteredData = tutors.filter(doc => doc.tutorId !== null);
-
-        console.log(filteredData);
-
-        const ids = filteredData.map(item => item.tutorId._id);
-
-        const newdata = await TutorTimingSchema.find({ tutorId: { $in: ids } })
-            // .populate('tutorId')
-            // .exec((err, docs) => {
-            //     if (err) {
-            //         console.error(err);
-            //     } else {
-            //         console.log(docs);
-            //     }
-            // });
-
-        console.log('newdata == ', newdata);
-        // let assignedTo = null;
-
-        // Iterate through each tutor and assign the question to the first available tutor
-        // for (const tutorTiming of tutors) {
-        //     const tutor = tutorTiming.tutorId;
-
-        //     // Check if the tutor has not already been assigned a question
-        //     if (!tutor.questionassigned) {
-        //         // Assign the question to the tutor
-        //         const mainQuestion = new MainQuestionsSchema.findByIdAndUpdate(questionId, {
-        //             tutorId: tutor._id,
-        //         }, { new: true });
-        //         // const savedMainQuestion = await mainQuestion.save();
-
-        //         // Add the question to the tutor's list of assigned questions
-        //         const tutorQuestion = new TutorQuestions({
-        //             tutorId: tutor._id,
-        //             allQuestions: [
-        //                 {
-        //                     questionId,
-        //                     question,
-        //                     questionType: 'text',
-        //                     timeRemaining: 600,
-        //                 },
-        //             ],
-        //             stats: {
-        //                 answeredQuestions: 0,
-        //                 skippedQuestions: 0,
-        //             },
-        //         });
-        //         await tutorQuestion.save();
-
-        //         // Update the tutor's questionassigned field to true
-        //         await TutorRegister.updateOne({ _id: tutor._id }, { $set: { questionassigned: true } });
-
-        //         assignedTo = tutor;
-        //         break;
-        //     }
-        // }
-
-        // if (assignedTo) {
-        //     res.json({ message: `Question assigned to tutor ${assignedTo.email}` });
-        // } else {
-        //     res.json({ message: 'No tutor available to assign the question' });
-        // }
 
         // end of sent to tutor
-        res.status(200).json({ message: 'Question posted successfully' });
+        
     } catch (error) {
         console.log("dfsd");
         console.log(error);
@@ -223,43 +154,6 @@ router.post("/ask", upload.array('questionPhoto', 5), async (req, res) => {
 
 router.get("/:id", async (req, res) => {
     try {
-
-        /*
-
-      const question = await MainQuestions.findById({_id: req.params.id});
-    //   console.log(question);
-      if (!question) {
-        res.status(404).json({ error: "Question not found" });
-        return;
-      }
-  
-      // Fetch the images from the Image collection
-      const images = await ImageSchema.find({ _id: { $in: question.questionPhoto } });
-  
-      // Map the image documents to URLs
-      const imageUrls = images.map((image) => {
-        return `${req.protocol}://${req.get("host")}/images/${image.name}`;
-      });
-  
-      res.status(200).json({
-        question: {
-          id: question._id,
-          question: question.question,
-          questionPhoto: imageUrls,
-          questionType: question.questionType,
-          questionSubject: question.questionSubject,
-          status: question.status,
-          studentId: question.studentId,
-          questionPrice: question.questionPrice,
-          tutorPrice: question.tutorPrice,
-          adminPrice: question.adminPrice,
-          createdAt: question.createdAt,
-        },
-      });
-
-
-      */
-
         const question = await MainQuestionsSchema.findById(req.params.id).populate('questionPhoto').exec();
         if (!question) {
             return res.status(404).json({ error: 'Question not found' });
@@ -299,6 +193,250 @@ router.get("/:id", async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 });
+
+// async function findTutorAndAssignQuestion(question) {
+//     try {
+//         console.log(question);
+//         const tutors = await TutorRegisterSchema.aggregate([
+//             {
+//                 $match: {
+//                     isSuspended: false,
+//                     questionassigned: false
+//                 }
+//             },
+//             {
+//                 $lookup: {
+//                     from: 'TutorSubjects',
+//                     localField: '_id',
+//                     foreignField: 'tutorId',
+//                     as: 'subjects'
+//                 }
+//             },
+//             {
+//                 $unwind: '$subjects'
+//             },
+//             {
+//                 $unwind: '$subjects.subjects'
+//             },
+//             {
+//                 $match: {
+//                     'subjects.subjects': question.questionSubject
+//                 }
+//             },
+//             {
+//                 $lookup: {
+//                     from: 'TutorTiming',
+//                     localField: '_id',
+//                     foreignField: 'tutorId',
+//                     as: 'timing'
+//                 }
+//             },
+//             {
+//                 $unwind: '$timing'
+//             },
+//             {
+//                 $project: {
+//                     _id: 1,
+//                     screenTime: '$timing.screenTime'
+//                 }
+//             },
+//             {
+//                 $sort: {
+//                     screenTime: -1
+//                 }
+//             }
+//         ]);
+
+//         console.log('Matching tutors: ', tutors);
+
+//         let assignedTutorId;
+
+//         if (tutors.length > 0) {
+//             assignedTutorId = tutors[0]._id;
+//         } else {
+//             // If no available tutors are found, get all tutors who are not suspended and sort them by their answer/skipped question ratio
+//             const allTutors = await TutorRegisterSchema.aggregate([
+//                 {
+//                     $match: {
+//                         isSuspended: false
+//                     }
+//                 },
+//                 {
+//                     $lookup: {
+//                         from: 'TutorSubjects',
+//                         localField: '_id',
+//                         foreignField: 'tutorId',
+//                         as: 'subjects'
+//                     }
+//                 },
+//                 {
+//                     $unwind: '$subjects'
+//                 },
+//                 {
+//                     $unwind: '$subjects.subjects'
+//                 },
+//                 {
+//                     $match: {
+//                         'subjects.subjects': question.questionSubject
+//                     }
+//                 },
+//                 {
+//                     $lookup: {
+//                         from: 'TutorQuestions',
+//                         localField: '_id',
+//                         foreignField: 'tutorId',
+//                         as: 'questions'
+//                     }
+//                 },
+//                 {
+//                     $project: {
+//                         _id: 1,
+//                         answeredQuestions: '$questions.stats.answeredQuestions',
+//                         skippedQuestions: '$questions.stats.skippedQuestions'
+//                     }
+//                 },
+//                 {
+//                     $project: {
+//                         _id: 1,
+//                         answerSkippedRatio: {
+//                             $cond: [
+//                                 { $eq: ['$answeredQuestions', 0] },
+//                                 0,
+//                                 {
+//                                     $cond: [
+//                                         { $eq: [{ $add: [{ $sum: '$answeredQuestions' }, { $sum: '$skippedQuestions' }] }, 0] },
+//                                         0,
+//                                         {
+//                                             $divide: [
+//                                                 { $sum: '$answeredQuestions' },
+//                                                 { $add: [{ $sum: '$answeredQuestions' }, { $sum: '$skippedQuestions' }] }
+//                                             ]
+//                                         }
+//                                     ]
+//                                 }
+//                             ]
+//                         }
+
+//                     }
+//                 },
+//                 {
+//                     $sort: {
+//                         answerSkippedRatio: 1
+//                     }
+//                 }
+//             ]);
+
+
+//             console.log('allTutors - ', allTutors);
+
+//             // Use a round-robin approach to assign the question to one of the available tutors
+//             const numTutors = allTutors.length;
+//             if (numTutors === 0) {
+//                 throw new Error('No tutors available to assign question');
+//             }
+
+//             // Assign the question to the tutor with the highest ratio
+//             const assignedTutor = allTutors[0];
+//             assignedTutorId = assignedTutor._id;
+//         }
+
+//         if (assignedTutorId) {
+//             // Update tutor's questions and screen time
+//             var timing = await QuestionTimingSchema.findOne({Type: question.questionType});
+//             var settime = timing.first_time;
+//             var currentTimePlusExtra = new Date();
+//             currentTimePlusExtra.setMinutes(currentTimePlusExtra.getMinutes() + parseInt(settime));
+
+//             console.log("assignedTutorId - ", assignedTutorId);
+//             console.log("question - ", question);
+//             var tutque;
+//             try {
+
+//                 tutque =  await TutorQuestionsSchema.findOneAndUpdate({ tutorId: assignedTutorId }, {
+//                     $push: {
+//                         allQuestions: {
+//                             // questionId: question.questionId,
+//                             question: question.question,
+//                             questionType: question.questionType,
+//                             questionSubject: question.questionSubject,
+//                             questionPhoto: question.questionPhoto,
+//                             tutorPrice: question.tutorPrice,
+                            
+//                         }
+//                     }
+//                     // $inc: { 'stats.answeredQuestions': 0, 'stats.skippedQuestions': 0 }
+//                 }, (error, result) => {
+//                     if (error) {
+//                         console.log("dsds");
+//                         console.error(error);
+//                         return;
+//                     }
+//                     console.log('Array of questions pushed in new:', result);
+//                 });
+//                 console.log("tutque - ", tutque);
+                
+//             } catch (error) {
+//                 console.log("error in tutques - ", error);
+//             }
+            
+
+//             // if(!tutque) {
+//             //     return false;
+//             // }
+
+//             // Update tutor's question assigned status
+
+//             var tutreg;
+//             try {
+//                 tutreg = await TutorRegisterSchema.findOneAndUpdate({ _id: assignedTutorId }, {
+//                     $set: { questionassigned: true }
+//                 });
+    
+//                 console.log("tutreg - ", tutreg);
+                
+//             } catch (error) {
+//                 console.log("error in tutreg - ", error);
+//             }
+            
+
+
+//             // if(!tutreg) {
+//             //     return false;
+//             // }
+
+//             var new_mainque;
+
+//             try {
+//                 var new_mainque = await MainQuestionsSchema.findOneAndUpdate({ _id: question.questionId }, {
+//                     internalStatus: "AssignedWithFindResponse",
+//                     que_timer_end: currentTimePlusExtra
+//                 }, {new: true});
+    
+//                 console.log("new_mainque - ", new_mainque);
+                
+//             } catch (error) {
+//                 console.log("error in new_mainque - ", error);
+//             }
+            
+
+//             // if(!new_mainque) {
+//             //     return false;
+//             // }
+
+            
+
+//             return true;
+
+//         } else {
+//             return false;
+//         }
+
+//     }
+//     catch (error) {
+//         console.log("error = ", error);
+//         return false;
+//     }
+// }
 
 
 

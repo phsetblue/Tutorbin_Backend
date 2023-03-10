@@ -21,3 +21,4 @@ export { default as TutorAddScreenTimeValidatorSchema } from "./tutoraddscreenti
 
 export { default as AdminRegisterValidatorSchema } from "./adminregisterValidator.js";
 export { default as AdminLoginValidatorSchema } from "./adminloginValidator.js";
+export { default as AdminSetQuestionTimingValidatorSchema } from "./adminsetquestiontimingValidator.js"
